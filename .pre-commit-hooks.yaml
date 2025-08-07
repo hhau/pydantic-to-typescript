@@ -1,0 +1,5 @@
+-   id: pydantic-to-typescript
+    name: Pydantic to typescript
+    description: This hook translates a pydantic model into typescript types.
+    entry: pydantic2ts
+    language: python
