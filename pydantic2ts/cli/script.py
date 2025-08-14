@@ -301,6 +301,7 @@ def generate_typescript_defs(
     output: str,
     exclude: Tuple[str, ...] = (),
     json2ts_cmd: str = "json2ts",
+    keep_json: bool = False
 ) -> None:
     """
     Convert the pydantic models in a python module into typescript interfaces.
@@ -342,13 +343,17 @@ def generate_typescript_defs(
     with open(schema_file_path, "w") as f:
         f.write(schema)
 
+    if keep_json:
+        LOG.info(f"JSON file containing schema is located at: {schema_file_path}")
+
     LOG.info("Converting JSON schema to typescript definitions...")
 
     json2ts_exit_code = os.system(
         f'{json2ts_cmd} -i {schema_file_path} -o {output} --bannerComment ""'
     )
 
-    shutil.rmtree(schema_dir)
+    if not keep_json:
+        shutil.rmtree(schema_dir)
 
     if json2ts_exit_code == 0:
         _clean_output_file(output)
@@ -392,6 +397,11 @@ def parse_cli_args(args: Optional[List[str]] = None) -> argparse.Namespace:
         "Provide this if it's not discoverable or if it's only installed locally (example: 'yarn json2ts').\n"
         "(default: json2ts)",
     )
+    parser.add_argument(
+        "--keep-json",
+        action="store_true",
+        help="If provided, keep the intermediate json and print the location of it."
+    )
     return parser.parse_args(args)
 
 
@@ -406,6 +416,7 @@ def main() -> None:
         args.output,
         tuple(args.exclude),
         args.json2ts_cmd,
+        args.keep_json
     )
 
 
